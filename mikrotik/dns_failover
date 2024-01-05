@@ -1,0 +1,21 @@
+:local primaryDNS "1.1.1.1"
+:local secondaryDNS "1.0.0.1"
+:local currentDNSConfig [/ip dns get servers]
+:local dnsChanged false
+
+:if ([:ping $primaryDNS count=1] != 0) do={
+
+  :if ($currentDNSConfig != $primaryDNS) do={
+    /ip dns set servers=$primaryDNS
+    /ip dns cache flush
+    :log info ("DNS configuration changed to $primaryDNS")
+  }
+
+} else={
+
+  :if (([:pick $currentDNSConfig 1] != $secondaryDNS)) do={
+    /ip dns set servers="$primaryDNS,$secondaryDNS"
+    :log info ("DNS configuration changed to $primaryDNS,$secondaryDNS")
+  }
+
+}
